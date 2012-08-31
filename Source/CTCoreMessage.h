@@ -128,8 +128,13 @@
 
 /**
  This method sets the message body. Plaintext only please!
-*/
+ */
 - (void)setBody:(NSString *)body;
+
+/**
+ This method returns true if html
+ */
+- (BOOL)hasHtmlBody;
 
 /**
  Use this method to set the body if you have HTML content.
@@ -174,11 +179,11 @@
 - (NSDate *)sentDateGMT;
 
 /**
-Returns the date in the Date field converted to the local timezone
-    
-The local timezone is the one set in the device running this code
-*/
-- (NSDate *)sentDateLocalTimeZone; 
+ Returns the date in the Date field converted to the local timezone
+ 
+ The local timezone is the one set in the device running this code
+ */
+- (NSDate *)sentDateLocalTimeZone;
 
 /**
  Returns YES if the message is unread.
@@ -198,22 +203,22 @@ The local timezone is the one set in the device running this code
 /**
  A machine readable ID that is guaranteed unique by the
  host that generated the message
-*/
+ */
 - (NSString *)messageId;
 
 /**
  Returns an NSUInteger containing the messages UID. This number is unique across sessions
-*/
+ */
 - (NSUInteger)uid;
 
 /**
  Returns the message sequence number, this number cannot be used across sessions
-*/
+ */
 - (NSUInteger)sequenceNumber;
 
 /**
  Returns the message size in bytes
-*/
+ */
 - (NSUInteger)messageSize;
 
 /**
@@ -221,7 +226,7 @@ The local timezone is the one set in the device running this code
  
  The flags contain if there user has replied, forwarded, read, delete etc.
  See MailCoreTypes.h for a list of constants
-*/
+ */
 - (NSUInteger)flags;
 
 /**
@@ -229,18 +234,18 @@ The local timezone is the one set in the device running this code
  
  This will NOT set any thing on the server.
  This is used to assign sequence numbers after retrieving the message list.
-*/
+ */
 - (void)setSequenceNumber:(NSUInteger)sequenceNumber;
 
 /**
  Parses the from list, the result is an NSSet containing CTCoreAddress's
-*/
+ */
 - (NSSet *)from;
 
 /**
  Sets the message's from addresses
  @param addresses A NSSet containing CTCoreAddress's
-*/
+ */
 - (void)setFrom:(NSSet *)addresses;
 
 /**
@@ -248,71 +253,71 @@ The local timezone is the one set in the device running this code
  
  The sender which isn't always the actual person who sent the message, it's usually the
  address of the machine that sent the message. In reality, this method isn't very useful, use from: instead.
-*/
+ */
 - (CTCoreAddress *)sender;
 
 /**
  Returns the list of people the message was sent to, returns an NSSet containing CTAddress's.
-*/
+ */
 - (NSSet *)to;
 
 /**
  Sets the message's to addresses
  @param addresses A NSSet containing CTCoreAddress's
-*/
+ */
 - (void)setTo:(NSSet *)addresses;
 
 /**
  Returns the list of people the message was cced to, returns an NSSet containing CTAddress's.
-*/
+ */
 - (NSSet *)cc;
 
 /**
  Sets the message's cc addresses
  @param addresses A NSSet containing CTCoreAddress's
-*/
+ */
 - (void)setCc:(NSSet *)addresses;
 
 /**
  Returns the list of people the message was bcced to, returns an NSSet containing CTAddress's.
-*/
+ */
 - (NSSet *)bcc;
 
 /**
  Sets the message's bcc addresses
  @param addresses A NSSet containing CTCoreAddress's
-*/
+ */
 - (void)setBcc:(NSSet *)addresses;
 
 /**
  Returns the list of people the message was in reply-to, returns an NSSet containing CTAddress's.
-*/
+ */
 - (NSSet *)replyTo;
 
 /**
  Sets the message's reply to addresses
  @param addresses A NSSet containing CTCoreAddress's
-*/
+ */
 - (void)setReplyTo:(NSSet *)addresses;
 
 /**
  Returns the message rendered as the appropriate MIME and IMF content.
  
  Use this only if you want the raw encoding of the message.
-*/
+ */
 - (NSString *)render;
 
 /**
- Returns the message in the format Mail.app uses, Emlx. 
+ Returns the message in the format Mail.app uses, Emlx.
  
  This format stores the message headers, body, and flags.
-*/
+ */
 - (NSData *)messageAsEmlx;
 
 /**
  Fetches from the server the rfc822 content of the message, which are the headers and the message body.
  @return Return nil on error. Call method lastError to get error if one occurred
-*/
+ */
 - (NSString *)rfc822;
 
 /* Intended for advanced use only */
