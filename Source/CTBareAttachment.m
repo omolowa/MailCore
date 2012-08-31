@@ -55,6 +55,7 @@
         
         //TODO Add the contentDisposition
         self.size = [NSNumber numberWithUnsignedLong:mMIMEPart.size];
+        
     }
     return self;
 }

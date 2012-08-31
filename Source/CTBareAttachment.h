@@ -36,7 +36,7 @@
 
 /**
  Represents an attachment before it has been fully fetched.
-*/
+ */
 @interface CTBareAttachment : NSObject {
     CTMIME_SinglePart *mMIMEPart;
     NSString    *mFilename;
@@ -54,15 +54,16 @@
 @property(readonly) CTMIME_SinglePart *part;
 
 -(NSString*)decodedFilename;
+
 - (id)initWithMIMESinglePart:(CTMIME_SinglePart *)part;
 /**
  Fetches the full attachment
-*/
+ */
 - (CTCoreAttachment *)fetchFullAttachment;
 /**
  Fetches the full attachment
  
  Also has a progress handler
-*/
+ */
 - (CTCoreAttachment *)fetchFullAttachmentWithProgress:(CTProgressBlock)block;
 @end
