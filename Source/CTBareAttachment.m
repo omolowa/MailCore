@@ -37,8 +37,12 @@
 #import "CTCoreAttachment.h"
 
 @implementation CTBareAttachment
+
+@synthesize attachedInline=mAttachedInline;
 @synthesize contentType=mContentType;
 @synthesize filename=mFilename;
+@synthesize contentId=mContentId;
+@synthesize size=mSize;
 
 - (id)initWithMIMESinglePart:(CTMIME_SinglePart *)part {
     self = [super init];
@@ -46,6 +50,11 @@
         mMIMEPart = [part retain];
         self.filename = mMIMEPart.filename;
         self.contentType = mMIMEPart.contentType;
+        self.contentId = mMIMEPart.contentId;
+        self.attachedInline = mMIMEPart.attachedInline;
+        
+        //TODO Add the contentDisposition
+        self.size = [NSNumber numberWithUnsignedLong:mMIMEPart.size];
     }
     return self;
 }
@@ -56,7 +65,7 @@
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"ContentType: %@\tFilename: %@",
-                self.contentType, self.filename];
+            self.contentType, self.filename];
 }
 
 - (CTCoreAttachment *)fetchFullAttachment {

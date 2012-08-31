@@ -36,9 +36,9 @@
  CTCoreMessage is how you work with messages. The easiest way to instantiate a CTCoreMessage
  is to first setup a CTCoreAccount object and then get a CTCoreFolder object and then use it's
  convenience method messageWithUID: to get a message object you can work with.
-
+ 
  Anything that begins with "fetch", requires that an active network connection is present.
-*/
+ */
 
 @class CTCoreFolder, CTCoreAddress, CTCoreAttachment, CTMIME;
 
@@ -52,78 +52,78 @@
 }
 /**
  If an error occurred (nil or return of NO) call this method to get the error
-*/
+ */
 @property (nonatomic, retain) NSError *lastError;
 
 @property (nonatomic, retain) CTCoreFolder *parentFolder;
 
 /**
  If the body structure has been fetched, this will contain the MIME structure
-*/
+ */
 @property(retain) CTMIME *mime;
 
 /**
  Used to instantiate an empty message object.
-*/
+ */
 - (id)init;
 
 /**
  Used to instantiate a message object with the contents of a mailmessage struct
  (a LibEtPan type). The mailmessage struct does not include any body information,
  so after calling this method the message will have a body which is NULL.
-*/
+ */
 - (id)initWithMessageStruct:(struct mailmessage *)message;
 
 /**
  Used to instantiate a message object based off the contents of a file on disk.
  The file on disk must be a valid MIME message.
-*/
+ */
 - (id)initWithFileAtPath:(NSString *)path;
 
 /**
  Used to instantiate a message object based off a string
  that contains a valid MIME message
-*/
+ */
 - (id)initWithString:(NSString *)msgData;
 
 /*
  Creates an empty message
-*/
+ */
 - (id)init;
 
 /**
  If a method returns nil or in the case of a BOOL returns NO, call this to get the error that occured
-*/
+ */
 - (NSError *)lastError;
 
 /**
  If the messages body structure hasn't been downloaded already it will be fetched from the server.
-
+ 
  The body structure is needed to get attachments or the message body
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)fetchBodyStructure;
 
 /**
  This method returns the parsed plain text message body as an NSString.
-
+ 
  If a plaintext body isn't found an empty string is returned
-*/
+ */
 - (NSString *)body;
 
 /**
  This method returns the html body as an NSString.
-*/
+ */
 - (NSString *)htmlBody;
 
-/**  
- Returns a message body as an NSString. 
-
+/**
+ Returns a message body as an NSString.
+ 
  @param isHTML Pass in a BOOL pointer that will be set to YES if an HTML body is loaded
-
+ 
  First attempts to retrieve a plain text body, if that fails then
  tries for an HTML body.
-*/
+ */
 - (NSString *)bodyPreferringPlainText:(BOOL *)isHTML;
 
 /**
@@ -133,45 +133,45 @@
 
 /**
  Use this method to set the body if you have HTML content.
-*/
+ */
 - (void)setHTMLBody:(NSString *)body;
 
 /**
  A list of attachments this message has
-*/
+ */
 - (NSArray *)attachments;
 
 /**
  Add an attachment to the message.
  
  Only used when sending e-mail
-*/
+ */
 - (void)addAttachment:(CTCoreAttachment *)attachment;
 
 /**
  Returns the subject of the message.
-*/
+ */
 - (NSString *)subject;
 
 /**
  Will set the subject of the message, use this when composing e-mail.
-*/
+ */
 - (void)setSubject:(NSString *)subject;
 
 /**
  Returns the timezone of the sender of the message (got from the Date field timezone attribute)
-*/
+ */
 - (NSTimeZone*)senderTimeZone;
 
 /**
  Returns the date as given in the Date mail field (no timezone is applied)
-*/
-- (NSDate *)senderDate; 
+ */
+- (NSDate *)senderDate;
 
 /**
  Returns the date in the Date field converted to GMT
-*/
-- (NSDate *)sentDateGMT; 
+ */
+- (NSDate *)sentDateGMT;
 
 /**
 Returns the date in the Date field converted to the local timezone
@@ -182,17 +182,17 @@ The local timezone is the one set in the device running this code
 
 /**
  Returns YES if the message is unread.
-*/
+ */
 - (BOOL)isUnread;
 
 /**
  Returns YES if the message is recent and unread.
-*/
+ */
 - (BOOL)isNew;
 
 /**
  Returns YES if the message is starred (flagged in IMAP terms).
-*/
+ */
 - (BOOL)isStarred;
 
 /**

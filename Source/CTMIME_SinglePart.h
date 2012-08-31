@@ -38,15 +38,17 @@ typedef void (^CTProgressBlock)(size_t curr, size_t max);
     struct mailmime *mMime;
     struct mailmessage *mMessage;
     struct mailmime_single_fields *mMimeFields;
-
+    
     NSData *mData;
     BOOL mAttached;
+    BOOL mAttachedInline;
     BOOL mFetched;
     NSString *mFilename;
     NSString *mContentId;
     NSError *lastError;
 }
 @property(nonatomic) BOOL attached;
+@property(nonatomic) BOOL attachedInline;
 @property(nonatomic) BOOL fetched;
 @property(nonatomic, retain) NSString *filename;
 @property(nonatomic, retain) NSString *contentId;
@@ -55,7 +57,7 @@ typedef void (^CTProgressBlock)(size_t curr, size_t max);
 
 /*
  If an error occurred (nil or return of NO) call this method to get the error
-*/
+ */
 @property(nonatomic, retain) NSError *lastError;
 
 + (id)mimeSinglePartWithData:(NSData *)data;

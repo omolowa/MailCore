@@ -54,7 +54,9 @@
 @end
 
 @implementation CTCoreMessage
-@synthesize mime=myParsedMIME, lastError, parentFolder;
+@synthesize mime=myParsedMIME, lastError;
+
+@synthesize parentFolder;
 
 - (id)init {
     [super init];
@@ -83,7 +85,7 @@
 
 - (id)initWithString:(NSString *)msgData {
     struct mailmessage *msg = data_message_init((char *)[msgData cStringUsingEncoding:NSUTF8StringEncoding],
-                                    [msgData lengthOfBytesUsingEncoding:NSUTF8StringEncoding]);
+                                                [msgData lengthOfBytesUsingEncoding:NSUTF8StringEncoding]);
     int err;
     struct mailmime *dummyMime;
     /* mailmessage_get_bodystructure will fill the mailmessage struct for us */
@@ -117,7 +119,7 @@
     if (myMessage == NULL) {
         return NO;
     }
-
+    
     int err;
     struct mailmime *dummyMime;
     //Retrieve message mime and message field
@@ -127,8 +129,8 @@
         return NO;
     }
     myParsedMIME = [[CTMIMEFactory createMIMEWithMIMEStruct:[self messageStruct]->msg_mime
-                        forMessage:[self messageStruct]] retain];
-
+                                                 forMessage:[self messageStruct]] retain];
+    
     return YES;
 }
 
@@ -165,7 +167,7 @@
     else if ([mime isKindOfClass:[CTMIME_MultiPart class]]) {
         return YES;
     }
-
+    
     return NO;
 }
 
@@ -194,7 +196,7 @@
 - (void)_buildUpBodyText:(CTMIME *)mime result:(NSMutableString *)result {
     if (mime == nil)
         return;
-
+    
     if ([mime isKindOfClass:[CTMIME_MessagePart class]]) {
         [self _buildUpBodyText:[mime content] result:result];
     }
@@ -220,7 +222,7 @@
 - (void)_buildUpHtmlBodyText:(CTMIME *)mime result:(NSMutableString *)result {
     if (mime == nil)
         return;
-
+    
     if ([mime isKindOfClass:[CTMIME_MessagePart class]]) {
         [self _buildUpHtmlBodyText:[mime content] result:result];
     }
@@ -247,7 +249,7 @@
 - (void)setBody:(NSString *)body {
     CTMIME *oldMIME = myParsedMIME;
     CTMIME_TextPart *text = [CTMIME_TextPart mimeTextPartWithString:body];
-
+    
     // If myParsedMIME is already a multi-part mime, just add it. otherwise replace it.
     //TODO: If setBody is called multiple times it will add text parts multiple times. Instead
     // it should find the existing text part (if there is one) and replace it
@@ -265,7 +267,7 @@
     CTMIME_HtmlPart *text = [CTMIME_HtmlPart mimeTextPartWithString:body];
     CTMIME_MessagePart *messagePart = [CTMIME_MessagePart mimeMessagePartWithContent:text];
     myParsedMIME = [messagePart retain];
-    [oldMIME release];	
+    [oldMIME release];
 }
 
 - (NSArray *)attachments {
@@ -290,12 +292,12 @@
 - (void)addAttachment:(CTCoreAttachment *)attachment {
     CTMIME_MultiPart *multi;
     CTMIME_MessagePart *msg;
-
+    
     if ([myParsedMIME isKindOfClass:[CTMIME_MessagePart class]]) {
         msg = (CTMIME_MessagePart *)myParsedMIME;
         CTMIME *sub = [msg content];
-
-
+        
+        
         // Creat new multimime part if needed
         if ([sub isKindOfClass:[CTMIME_MultiPart class]]) {
             multi = (CTMIME_MultiPart *)sub;
@@ -304,12 +306,14 @@
             [multi addMIMEPart:sub];
             [msg setContent:multi];
         }
-
+        
         // add new SinglePart which encodes the attachment in base64
         CTMIME_SinglePart *attpart = [CTMIME_SinglePart mimeSinglePartWithData:[attachment data]];
         attpart.contentType = [attachment contentType];
         attpart.filename = [attachment filename];
-
+        attpart.contentId = [attachment contentId];
+        attpart.attachedInline = [attachment attachedInline];
+        
         [multi addMIMEPart:attpart];
     }
 }
@@ -325,28 +329,28 @@
 
 - (void)setSubject:(NSString *)subject {
     struct mailimf_subject *subjectStruct;
-
+    
     subjectStruct = mailimf_subject_new(strdup([subject cStringUsingEncoding:NSUTF8StringEncoding]));
     if (myFields->fld_subject != NULL)
         mailimf_subject_free(myFields->fld_subject);
     myFields->fld_subject = subjectStruct;
 }
 
-- (struct mailimf_date_time*)libetpanDateTime {    
+- (struct mailimf_date_time*)libetpanDateTime {
     if(!myFields || !myFields->fld_orig_date || !myFields->fld_orig_date->dt_date_time)
         return NULL;
-
+    
     return myFields->fld_orig_date->dt_date_time;
 }
 
 - (NSTimeZone*)senderTimeZone {
     struct mailimf_date_time *d;
-
+    
     if((d = [self libetpanDateTime]) == NULL)
         return nil;
-
+    
     NSInteger timezoneOffsetInSeconds = 3600*d->dt_zone/100;
-
+    
     return [NSTimeZone timeZoneForSecondsFromGMT:timezoneOffsetInSeconds];
 }
 
@@ -355,25 +359,25 @@
         return [NSDate distantPast];
     } else {
         struct mailimf_date_time *d;
-
+        
         if ((d = [self libetpanDateTime]) == NULL)
             return nil;
-
+        
         NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
         NSDateComponents *comps = [[NSDateComponents alloc] init];
-
+        
         [comps setYear:d->dt_year];
         [comps setMonth:d->dt_month];
         [comps setDay:d->dt_day];
         [comps setHour:d->dt_hour];
         [comps setMinute:d->dt_min];
         [comps setSecond:d->dt_sec];
-
+        
         NSDate *messageDateNoTimezone = [calendar dateFromComponents:comps];
-
+        
         [comps release];
         [calendar release];
-
+        
         // no timezone applied
         return messageDateNoTimezone;
     }
@@ -381,14 +385,14 @@
 
 - (NSDate *)sentDateGMT {
     struct mailimf_date_time *d;
-
+    
     if((d = [self libetpanDateTime]) == NULL)
         return nil;
-
+    
     NSInteger timezoneOffsetInSeconds = 3600*d->dt_zone/100;
-
+    
     NSDate *date = [self senderDate];
-
+    
     return [date dateByAddingTimeInterval:timezoneOffsetInSeconds * -1];
 }
 
@@ -465,7 +469,7 @@
 - (NSSet *)from {
     if (myFields->fld_from == NULL)
         return nil;
-
+    
     return [self _addressListFromMailboxList:myFields->fld_from->frm_mb_list];
 }
 
@@ -481,7 +485,7 @@
 - (CTCoreAddress *)sender {
     if (myFields->fld_sender == NULL)
         return nil;
-
+    
     return [self _addressFromMailbox:myFields->fld_sender->snd_mb];
 }
 
@@ -496,7 +500,7 @@
 
 - (void)setTo:(NSSet *)addresses {
     struct mailimf_address_list *imf = [self _IMFAddressListFromAddresssList:addresses];
-
+    
     if (myFields->fld_to != NULL) {
         mailimf_address_list_free(myFields->fld_to->to_addr_list);
         myFields->fld_to->to_addr_list = imf;
@@ -565,7 +569,7 @@
 
 - (NSString *)render {
     CTMIME *msgPart = myParsedMIME;
-
+    
     if ([myParsedMIME isKindOfClass:[CTMIME_MessagePart class]]) {
         /* It's a message part, so let's set it's fields */
         struct mailimf_fields *fields;
@@ -578,7 +582,7 @@
         clist *inReplyTo = (myFields->fld_in_reply_to != NULL) ? (myFields->fld_in_reply_to->mid_list) : NULL;
         clist *references = (myFields->fld_references != NULL) ? (myFields->fld_references->mid_list) : NULL;
         char *subject = (myFields->fld_subject != NULL) ? (myFields->fld_subject->sbj_value) : NULL;
-
+        
         //TODO uh oh, when this get freed it frees stuff in the CTCoreMessage
         //TODO Need to make sure that fields gets freed somewhere
         fields = mailimf_fields_new_with_data(from, sender, replyTo, to, cc, bcc, inReplyTo, references, subject);
@@ -593,8 +597,8 @@
     NSMutableData *emlx = [NSMutableData data];
     [emlx appendData:[[NSString stringWithFormat:@"%-10d\n", (uint32_t)msgContentAsData.length] dataUsingEncoding:NSUTF8StringEncoding]];
     [emlx appendData:msgContentAsData];
-
-
+    
+    
     struct mail_flags *flagsStruct = myMessage->msg_flags;
     uint64_t flags = 0;
     if (flagsStruct != NULL) {
@@ -607,12 +611,12 @@
         BOOL forwarded = (flagsStruct->fl_flags & CTFlagForwarded) > 0;
         flags |= forwarded << 8;
     }
-
+    
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     [dictionary setValue:[NSNumber numberWithDouble:[[self senderDate] timeIntervalSince1970]] forKey:@"date-sent"];
     [dictionary setValue:[NSNumber numberWithUnsignedLongLong:flags] forKey:@"flags"];
     [dictionary setValue:[self subject] forKey:@"subject"];
-
+    
     NSError *error;
     NSData *propertyList = [NSPropertyListSerialization dataWithPropertyList:dictionary
                                                                       format:NSPropertyListXMLFormat_v1_0
@@ -645,12 +649,12 @@
     struct imap_cached_session_state_data * cached_data;
     struct imap_session_state_data * data;
     mailsession *session = [self messageStruct]->msg_session;
-
+    
     if (strcasecmp(session->sess_driver->sess_name, "imap-cached") == 0) {
         cached_data = session->sess_data;
         session = cached_data->imap_ancestor;
     }
-
+    
     data = session->sess_data;
     return data->imap_session;
 }
@@ -679,10 +683,10 @@
     clistiter * iter;
     struct mailimf_mailbox *address;
     NSMutableSet *addressSet = [NSMutableSet set];
-
+    
     if (mailboxList == NULL)
         return addressSet;
-
+    
     list = mailboxList->mb_list;
     for(iter = clist_begin(list); iter != NULL; iter = clist_next(iter)) {
         address = clist_content(iter);
@@ -699,7 +703,7 @@
     int err;
     const char *addressName;
     const char *addressEmail;
-
+    
     while((address = [objEnum nextObject])) {
         addressName = [[address name] cStringUsingEncoding:NSUTF8StringEncoding];
         addressEmail = [[address email] cStringUsingEncoding:NSUTF8StringEncoding];
@@ -715,10 +719,10 @@
     clistiter * iter;
     struct mailimf_address *address;
     NSMutableSet *addressSet = [NSMutableSet set];
-
+    
     if (imfList == NULL)
         return addressSet;
-
+    
     list = imfList->ad_list;
     for(iter = clist_begin(list); iter != NULL; iter = clist_next(iter)) {
         address = clist_content(iter);
@@ -737,13 +741,13 @@
 
 - (struct mailimf_address_list *)_IMFAddressListFromAddresssList:(NSSet *)addresses {
     struct mailimf_address_list *imfList = mailimf_address_list_new_empty();
-
+    
     NSEnumerator *objEnum = [addresses objectEnumerator];
     CTCoreAddress *address;
     int err;
     const char *addressName;
     const char *addressEmail;
-
+    
     while((address = [objEnum nextObject])) {
         addressName = [[address name] cStringUsingEncoding:NSUTF8StringEncoding];
         addressEmail = [[address email] cStringUsingEncoding:NSUTF8StringEncoding];

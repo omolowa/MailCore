@@ -56,6 +56,8 @@ static void download_progress_callback(size_t current, size_t maximum, void * co
 @end
 
 @implementation CTMIME_SinglePart
+
+@synthesize attachedInline=mAttachedInline;
 @synthesize attached=mAttached;
 @synthesize filename=mFilename;
 @synthesize contentId=mContentId;
@@ -76,23 +78,24 @@ static void download_progress_callback(size_t current, size_t maximum, void * co
     return self;
 }
 
-- (id)initWithMIMEStruct:(struct mailmime *)mime 
-        forMessage:(struct mailmessage *)message {
+- (id)initWithMIMEStruct:(struct mailmime *)mime forMessage:(struct mailmessage *)message
+{
     self = [super initWithMIMEStruct:mime forMessage:message];
     if (self) {
         self.data = nil;
         mMime = mime;
         mMessage = message;
         self.fetched = NO;
-
+        
         mMimeFields = mailmime_single_fields_new(mMime->mm_mime_fields, mMime->mm_content_type);
         if (mMimeFields != NULL) {
             struct mailmime_disposition *disp = mMimeFields->fld_disposition;
+            
             if (disp != NULL) {
                 if (disp->dsp_type != NULL) {
                     self.attached = (disp->dsp_type->dsp_type ==
-                                        MAILMIME_DISPOSITION_TYPE_ATTACHMENT);
-
+                                     MAILMIME_DISPOSITION_TYPE_ATTACHMENT);
+                    
                     if (self.attached)
                     {
                         // MWA workaround for bug where specific emails look like this:
@@ -103,41 +106,50 @@ static void download_progress_callback(size_t current, size_t maximum, void * co
                         // Content-Disposition: attachment; filename="photo.JPG"
                         if (mMimeFields->fld_disposition_filename == NULL && mMimeFields->fld_content_name != NULL)
                             mMimeFields->fld_disposition_filename = mMimeFields->fld_content_name;
+                        
+                        //   NSLog(@"attachemtn is attachment!");
+                        
                     }
+                    
+                    self.attachedInline = (disp->dsp_type->dsp_type == MAILMIME_DISPOSITION_TYPE_INLINE);
+                    
+                    //if (self.attachedInline)
+                    // NSLog(@"attachemtn is inline!");
                 }
             }
-
+            
             if (mMimeFields->fld_disposition_filename != NULL) {
                 self.filename = [NSString stringWithCString:mMimeFields->fld_disposition_filename encoding:NSUTF8StringEncoding];
-
+                
                 if (mMimeFields->fld_id != NULL)
-                    self.contentId = [NSString stringWithCString:mMimeFields->fld_id encoding:NSUTF8StringEncoding]; 
-
+                    self.contentId = [NSString stringWithCString:mMimeFields->fld_id encoding:NSUTF8StringEncoding];
+                
                 NSString* lowercaseName = [self.filename lowercaseString];
+                
                 if([lowercaseName hasSuffix:@".xls"] ||
-                    [lowercaseName hasSuffix:@".xlsx"] ||
-                    [lowercaseName hasSuffix:@".key.zip"] ||
-                    [lowercaseName hasSuffix:@".numbers.zip"] ||
-                    [lowercaseName hasSuffix:@".pages.zip"] ||
-                    [lowercaseName hasSuffix:@".pdf"] ||
-                    [lowercaseName hasSuffix:@".ppt"] ||
-                    [lowercaseName hasSuffix:@".doc"] ||
-                    [lowercaseName hasSuffix:@".docx"] ||
-                    [lowercaseName hasSuffix:@".rtf"] ||
-                    [lowercaseName hasSuffix:@".rtfd.zip"] ||
-                    [lowercaseName hasSuffix:@".key"] ||
-                    [lowercaseName hasSuffix:@".numbers"] ||
-                    [lowercaseName hasSuffix:@".pages"] ||
-                    [lowercaseName hasSuffix:@".png"] ||
-                    [lowercaseName hasSuffix:@".gif"] ||
-                    [lowercaseName hasSuffix:@".png"] ||
-                    [lowercaseName hasSuffix:@".jpg"] ||
-                    [lowercaseName hasSuffix:@".jpeg"] ||
-                    [lowercaseName hasSuffix:@".tiff"]) { // hack by gabor, improved by waseem, based on http://developer.apple.com/iphone/library/qa/qa2008/qa1630.html
+                   [lowercaseName hasSuffix:@".xlsx"] ||
+                   [lowercaseName hasSuffix:@".key.zip"] ||
+                   [lowercaseName hasSuffix:@".numbers.zip"] ||
+                   [lowercaseName hasSuffix:@".pages.zip"] ||
+                   [lowercaseName hasSuffix:@".pdf"] ||
+                   [lowercaseName hasSuffix:@".ppt"] ||
+                   [lowercaseName hasSuffix:@".doc"] ||
+                   [lowercaseName hasSuffix:@".docx"] ||
+                   [lowercaseName hasSuffix:@".rtf"] ||
+                   [lowercaseName hasSuffix:@".rtfd.zip"] ||
+                   [lowercaseName hasSuffix:@".key"] ||
+                   [lowercaseName hasSuffix:@".numbers"] ||
+                   [lowercaseName hasSuffix:@".pages"] ||
+                   [lowercaseName hasSuffix:@".png"] ||
+                   [lowercaseName hasSuffix:@".gif"] ||
+                   [lowercaseName hasSuffix:@".png"] ||
+                   [lowercaseName hasSuffix:@".jpg"] ||
+                   [lowercaseName hasSuffix:@".jpeg"] ||
+                   [lowercaseName hasSuffix:@".tiff"]) { // hack by gabor, improved by waseem, based on http://developer.apple.com/iphone/library/qa/qa2008/qa1630.html
                     self.attached = YES;
                 }
             }
-
+            
         }
     }
     return self;
@@ -146,35 +158,36 @@ static void download_progress_callback(size_t current, size_t maximum, void * co
 - (BOOL)fetchPartWithProgress:(CTProgressBlock)block {
     if (self.fetched == NO) {
         struct mailmime_single_fields *mimeFields = NULL;
-
+        
         int encoding = MAILMIME_MECHANISM_8BIT;
         mimeFields = mailmime_single_fields_new(mMime->mm_mime_fields, mMime->mm_content_type);
         if (mimeFields != NULL && mimeFields->fld_encoding != NULL)
             encoding = mimeFields->fld_encoding->enc_type;
-
+        
         char *fetchedData;
         size_t fetchedDataLen;
         int r;
-
+        
         if (mMessage->msg_session != NULL) {
-            mailimap_set_progress_callback(get_imap_session(mMessage), &download_progress_callback, NULL, block);  
+            mailimap_set_progress_callback(get_imap_session(mMessage), &download_progress_callback, NULL, block);
         }
         r = mailmessage_fetch_section(mMessage, mMime, &fetchedData, &fetchedDataLen);
         if (mMessage->msg_session != NULL) {
-            mailimap_set_progress_callback(get_imap_session(mMessage), NULL, NULL, NULL); 
+            mailimap_set_progress_callback(get_imap_session(mMessage), NULL, NULL, NULL);
         }
         if (r != MAIL_NO_ERROR) {
-            mailmessage_fetch_result_free(mMessage, fetchedData);
+            if (fetchedData != NULL)
+                mailmessage_fetch_result_free(mMessage, fetchedData);
             self.lastError = MailCoreCreateErrorFromIMAPCode(r);
             return NO;
         }
-
-
+        
+        
         size_t current_index = 0;
         char * result;
         size_t result_len;
         r = mailmime_part_parse(fetchedData, fetchedDataLen, &current_index,
-                                    encoding, &result, &result_len);
+                                encoding, &result, &result_len);
         if (r != MAILIMF_NO_ERROR) {
             mailmime_decoded_part_free(result);
             self.lastError = MailCoreCreateError(r, @"Error parsing the message");
@@ -199,17 +212,45 @@ static void download_progress_callback(size_t current, size_t maximum, void * co
     struct mailmime *mime_sub;
     struct mailmime_content *content;
     int r;
-
+    
+    //    struct mailmime_fields *mime_fields = NULL;
+	struct mailmime_field *mime_id = NULL;
+    
+    
+    
     if (mFilename) {
-        mime_fields = mailmime_fields_new_filename( MAILMIME_DISPOSITION_TYPE_ATTACHMENT, 
-                                                    (char *)[mFilename cStringUsingEncoding:NSUTF8StringEncoding], 
-                                                    MAILMIME_MECHANISM_BASE64 ); 
+        
+        if (mAttachedInline)
+        {
+            mime_fields = mailmime_fields_new_filename(MAILMIME_DISPOSITION_TYPE_INLINE,
+                                                       (char *)[mFilename cStringUsingEncoding:NSUTF8StringEncoding],
+                                                       MAILMIME_MECHANISM_BASE64);
+            // These must be malloc-ated
+            mime_id = mailmime_field_new(MAILMIME_FIELD_ID, NULL, NULL,
+                                         strdup((char *)[mContentId cStringUsingEncoding:NSUTF8StringEncoding]), NULL, 1, NULL, NULL, NULL);
+            
+            clist_append(mime_fields->fld_list, mime_id);
+            
+        }
+        else
+        {
+            mime_fields = mailmime_fields_new_filename( MAILMIME_DISPOSITION_TYPE_ATTACHMENT,
+                                                       (char *)[mFilename cStringUsingEncoding:NSUTF8StringEncoding],
+                                                       MAILMIME_MECHANISM_BASE64 );
+        }
+        
+        
+        
+        
     } else {
+        
         mime_fields = mailmime_fields_new_encoding(MAILMIME_MECHANISM_BASE64);
     }
+    
+    
     content = mailmime_content_new_with_str([self.contentType cStringUsingEncoding:NSUTF8StringEncoding]);
     mime_sub = mailmime_new_empty(content, mime_fields);
-
+    
     // Add Data
     r = mailmime_set_body_text(mime_sub, (char *)[self.data bytes], [self.data length]);
     return mime_sub;

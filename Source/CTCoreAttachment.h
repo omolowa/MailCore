@@ -33,8 +33,8 @@
 #import "CTBareAttachment.h"
 
 /**
-  A message's attachment
-*/
+ A message's attachment
+ */
 @interface CTCoreAttachment : CTBareAttachment {
     NSData *mData;
 }
@@ -43,7 +43,7 @@
 /**
  Load the attachment from a local file
  NOTE: This currently only works on Mac OS X, use initWithData:contentType:filename: instead on iOS
-*/
+ */
 
 - (id)initWithContentsOfFile:(NSString *)path;
 /**
@@ -52,11 +52,22 @@
  @param data The actual attachment data
  @param contentType The MIME content type you'd like to use
  @param filename The filename you'd like the attachment to be given in the e-mail message
-*/
+ */
 - (id)initWithData:(NSData *)data contentType:(NSString *)contentType filename:(NSString *)filename;
 
 /**
+ Create an attachment from a chunk of data
+ 
+ @param data The actual attachment data
+ @param contentType The MIME content type you'd like to use
+ @param contentID The CID for an online attachment
+ @param filename The filename you'd like the attachment to be given in the e-mail message
+ @param attachmentInline Whether the attachment is inline or attached
+ */
+- (id)initWithData:(NSData *)data contentType:(NSString *)contentType contentId:(NSString *)contentId filename:(NSString *)filename inline:(BOOL)attachmentInline;
+
+/**
  Used to save the attachment locally
-*/
+ */
 - (BOOL)writeToFile:(NSString *)path;
 @end
