@@ -272,15 +272,18 @@
 
 - (NSArray *)attachments {
     NSMutableArray *attachments = [NSMutableArray array];
-
+    
     CTMIME_Enumerator *enumerator = [myParsedMIME mimeEnumerator];
     CTMIME *mime;
     while ((mime = [enumerator nextObject])) {
         if ([mime isKindOfClass:[CTMIME_SinglePart class]]) {
             CTMIME_SinglePart *singlePart = (CTMIME_SinglePart *)mime;
             if (singlePart.attached) {
+                
+                //                NSLog(@"singlePArt content ID: %@",singlePart.contentId);
+                
                 CTBareAttachment *attach = [[CTBareAttachment alloc]
-                                                initWithMIMESinglePart:singlePart];
+                                            initWithMIMESinglePart:singlePart];
                 [attachments addObject:attach];
                 [attach release];
             }
@@ -586,6 +589,18 @@
         //TODO uh oh, when this get freed it frees stuff in the CTCoreMessage
         //TODO Need to make sure that fields gets freed somewhere
         fields = mailimf_fields_new_with_data(from, sender, replyTo, to, cc, bcc, inReplyTo, references, subject);
+        
+        struct mailimf_field * field;
+        
+        //        char *xMailerString = (char*)[[NSString stringWithFormat:@"%@.%@",
+        //                                       kMWMissiveBuildMajorNumber,
+        //                                       kMWMissiveBuildMinorNumber]
+        //                                      cStringUsingEncoding:NSUTF8StringEncoding];
+        
+        field = mailimf_field_new_custom(strdup("X-Mailer"), strdup("Miss Ive 3.0.1"));
+        mailimf_fields_add(fields, field);
+        
+        
         [(CTMIME_MessagePart *)msgPart setIMFFields:fields];
     }
     return [myParsedMIME render];
