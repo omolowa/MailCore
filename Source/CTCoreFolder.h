@@ -37,7 +37,7 @@
  CTCoreFolder is the class used to get and set attributes for a server side folder. It is also the
  class used to get a list of messages from the server. You need to make sure and establish a connection
  first by calling connect.
-*/
+ */
 
 @class CTCoreMessage, CTCoreAccount;
 
@@ -50,7 +50,7 @@
 }
 /**
  If an error occurred (nil or return of NO) call this method to get the error
-*/
+ */
 @property (nonatomic, retain) NSError *lastError;
 
 @property (nonatomic, retain) CTCoreAccount *parentAccount;
@@ -59,28 +59,28 @@
  This method is used to initialize a folder. This method or the
  method in CTCoreAccount folderWithPath can be used to setup a folder.
  @param inAccount This parameter must be passed in so the folder can initiate it's connection.
-*/
+ */
 - (id)initWithPath:(NSString *)path inAccount:(CTCoreAccount *)account;
 
 /**
  This initiates the connection after the folder has been initalized.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)connect;
 
 /**
  This method terminates the connection
  
  Make sure you don't have any message connections open from this folder before disconnecting.
-*/
+ */
 - (void)disconnect;
 
 /**
  This will return the message from this folder with the UID that was passed in.
-
+ 
  A CTMessage object is returned which can be used to get further information and perform operationson the message.
  @return A CTCoreMessage or if not found, nil
-*/
+ */
 - (CTCoreMessage *)messageWithUID:(NSUInteger)uid;
 
 /**
@@ -96,26 +96,26 @@
  structure it won't re-fetch it.  Use CTFetchAttrEnvelope if you'd like to fetch the subject, to,
  from, cc, bcc, sender, date etc. You can also fetch both the envelope and body structure by passing
  in CTFetchAttrEnvelope | CTFetchAttrBodyStructure
-
+ 
  
  @param start The message sequence number to start from, starts with 1 and NOT 0 (IMAP starts with 1 that way, sorry)
  @param end The ending message sequence number, or if you'd like to fetch to the end of the message list pass in 0
  @param attrs This controls what is fetched.
  @return Returns a NSArray of CTCoreMessage's. Returns nil on error
-*/
+ */
 - (NSArray *)messagesFromSequenceNumber:(NSUInteger)startNum to:(NSUInteger)endNum withFetchAttributes:(CTFetchAttributes)attrs;
 
 /**
- Use this method to download message lists from the server. 
+ Use this method to download message lists from the server.
  
  This method uses UID ranges to determine which messages to download, while messagesFromSequenceNumber:to:withFetchAttributes: uses sequence numbers.
-
+ 
  @param start The message sequence number to start from, starts with 1 and NOT 0 (IMAP starts with 1 that way, sorry)
  @param end The ending message sequence number, or if you'd like to fetch to the end of the message list pass in 0
  @param attrs This controls what is fetched.
  @return Returns a NSArray of CTCoreMessage's. Returns nil on error
  @see messagesFromSequenceNumber:to:withFetchAttributes:
-*/
+ */
 - (NSArray *)messagesFromUID:(NSUInteger)startUID to:(NSUInteger)endUID withFetchAttributes:(CTFetchAttributes)attrs;
 
 /**
@@ -124,7 +124,7 @@
  valid per session.
  @param The uid for the message
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)sequenceNumberForUID:(NSUInteger)uid sequenceNumber:(NSUInteger *)sequenceNumber;
 
 
@@ -141,12 +141,12 @@
 
 /**
  The folder name.
-*/
+ */
 - (NSString *)name;
 
 /**
  The entire path of folder.
-*/
+ */
 - (NSString *)path;
 
 /**
@@ -155,33 +155,33 @@
  Use this method to rename the folder on the server or to move the folder on the server.
  @param path The new path for the folder as an NSString.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)setPath:(NSString *)path;
 
 /**
  If the folder doesn't exist on the server this method will create it. Make sure the pathname
  has been set first.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)create;
 
 /**
  This method will remove the folder and any messages contained within from the server.
  Be careful when using this method because there is no way to undo.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)delete;
 
 /**
  The folder will be listed as subscribed on the server.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)subscribe;
 
 /**
  The folder will be listed as unsubscribed.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)unsubscribe;
 
 /**
@@ -190,14 +190,14 @@
  CTFlagNew, CTFlagSeen, CTFlagFlagged, CTFlagDeleted,
  CTFlagAnswered, CTFlagForwarded.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)flagsForMessage:(CTCoreMessage *)msg flags:(NSUInteger *)flags;
 
 /**
  Sets the message's flags on the server, take a look at the
  documentation for flagsForMessage:
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)setFlags:(NSUInteger)flags forMessage:(CTCoreMessage *)msg;
 
 /**
@@ -207,46 +207,52 @@
  then when you call expunge on the folder the message is contained
  in, it will be deleted.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)expunge;
 
 /**
  Copies a message to a folder
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)copyMessageWithUID:(NSUInteger)uid toPath:(NSString *)path;
 
 /**
  Moves a message to a folder
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)moveMessageWithUID:(NSUInteger)uid toPath:(NSString *)path;
 
 /**
  Returns the number of unread messages. This causes a round trip to the server, as it fetches
  the count for each call.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)unreadMessageCount:(NSUInteger *)unseenCount;
 
 /**
  Returns the number of messages in the folder. The count was retrieved when the folder connection was
  established, so to refresh the count you must disconnect and reconnect.
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
-*/
+ */
 - (BOOL)totalMessageCount:(NSUInteger *)totalCount;
 
 /**
  Returns the uid validity value for the folder, which can be used to determine if the
  local cached UID's are still valid, or if the server has changed UID's
-*/
+ */
 - (NSUInteger)uidValidity;
 
 /**
  Returns the uid next value for the folder. The next message added to the mailbox
  will be assigned a UID greater than or equal to uidNext
-*/
+ */
 - (NSUInteger)uidNext;
+
+/**
+ Appends a message to a folder
+ @return Return YES on success, NO on error. Call method lastError to get error if one occured
+ */
+- (BOOL)appendMessage:(CTCoreMessage*)msg;
 
 /* Intended for advanced use only */
 - (struct mailfolder *)folderStruct;
