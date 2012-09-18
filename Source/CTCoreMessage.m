@@ -274,11 +274,6 @@
             CTMIME_SinglePart *singlePart = (CTMIME_SinglePart *)mime;
             if (singlePart.attached) {
                 
-<<<<<<< HEAD
-                //                NSLog(@"singlePArt content ID: %@",singlePart.contentId);
-                
-=======
->>>>>>> Initial Changes
                 CTBareAttachment *attach = [[CTBareAttachment alloc]
                                             initWithMIMESinglePart:singlePart];
                 [attachments addObject:attach];

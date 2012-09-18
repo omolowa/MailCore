@@ -79,12 +79,7 @@
 }
 
 - (struct mailmime *)buildMIMEStruct {
-<<<<<<< HEAD
-    //TODO make this smarter so it builds different types other than multipart/mixed
-    struct mailmime *mime = mailmime_multiple_new("multipart/related");
-=======
     struct mailmime *mime = mailmime_multiple_new([self.contentType UTF8String]);
->>>>>>> upstream/master
 
     NSEnumerator *enumer = [myContentList objectEnumerator];
 

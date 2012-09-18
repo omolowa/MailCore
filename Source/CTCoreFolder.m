@@ -629,31 +629,6 @@ int uid_list_to_env_list(clist * fetch_result, struct mailmessage_list ** result
     return YES;
 }
 
-- (BOOL)appendMessage:(CTCoreMessage*)msg {
-    BOOL success = [self connect];
-    if (!success) {
-        return NO;
-    }
-    
-<<<<<<< HEAD
-    //  char * msg822 = (char *)[[msg rfc822] cStringUsingEncoding:NSUTF8StringEncoding];
-=======
->>>>>>> Initial Changes
-    char * msgRendered = (char *)[[msg render] cStringUsingEncoding:NSUTF8StringEncoding];
-    
-    int err = mailfolder_append_message([self folderStruct], msgRendered, strlen(msgRendered) );
-    
-<<<<<<< HEAD
-    // int err = mailsession_append_message([self folderSession], msg822, sizeof(msg822));// mailsession_move_message([self folderSession], uid, mbPath);
-=======
->>>>>>> Initial Changes
-    if (err != MAIL_NO_ERROR) {
-        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
-        return NO;
-    }
-    return YES;
-}
-
 - (BOOL)unreadMessageCount:(NSUInteger *)unseenCount {
     unsigned int junk;
     int err;

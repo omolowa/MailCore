@@ -163,13 +163,8 @@ static void download_progress_callback(size_t current, size_t maximum, void * co
         mimeFields = mailmime_single_fields_new(mMime->mm_mime_fields, mMime->mm_content_type);
         if (mimeFields != NULL && mimeFields->fld_encoding != NULL)
             encoding = mimeFields->fld_encoding->enc_type;
-<<<<<<< HEAD
-        
-        char *fetchedData;
-=======
-
         char *fetchedData = NULL;
->>>>>>> upstream/master
+
         size_t fetchedDataLen;
         int r;
         
@@ -181,14 +176,9 @@ static void download_progress_callback(size_t current, size_t maximum, void * co
             mailimap_set_progress_callback(get_imap_session(mMessage), NULL, NULL, NULL);
         }
         if (r != MAIL_NO_ERROR) {
-<<<<<<< HEAD
-            if (fetchedData != NULL)
-                mailmessage_fetch_result_free(mMessage, fetchedData);
-=======
             if (fetchedData) {
                 mailmessage_fetch_result_free(mMessage, fetchedData);
             }
->>>>>>> upstream/master
             self.lastError = MailCoreCreateErrorFromIMAPCode(r);
             return NO;
         }

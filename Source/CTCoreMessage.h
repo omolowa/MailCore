@@ -86,16 +86,8 @@
  */
 - (id)initWithString:(NSString *)msgData;
 
-<<<<<<< HEAD
 /*
- Creates an empty message
- */
-- (id)init;
-
-=======
->>>>>>> upstream/master
-/**
- If a method returns nil or in the case of a BOOL returns NO, call this to get the error that occured
+// If a method returns nil or in the case of a BOOL returns NO, call this to get the error that occured
  */
 - (NSError *)lastError;
 

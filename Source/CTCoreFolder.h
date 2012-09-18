@@ -139,16 +139,8 @@
  */
 - (BOOL)check;
 
-/**
-<<<<<<< HEAD
- The folder name.
- */
-- (NSString *)name;
-
-/**
-=======
->>>>>>> upstream/master
- The entire path of folder.
+/*
+// The entire path of folder.
  */
 - (NSString *)path;
 
@@ -256,12 +248,6 @@
  will be assigned a UID greater than or equal to uidNext
  */
 - (NSUInteger)uidNext;
-
-/**
- Appends a message to a folder
- @return Return YES on success, NO on error. Call method lastError to get error if one occured
- */
-- (BOOL)appendMessage:(CTCoreMessage*)msg;
 
 /* Intended for advanced use only */
 - (struct mailfolder *)folderStruct;
