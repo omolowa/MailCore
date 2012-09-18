@@ -177,6 +177,10 @@
 }
 
 - (NSString *)htmlBody {
+    if (myFields == NULL || myParsedMIME == nil) {
+        [self fetchBodyStructure];
+    }
+
     NSMutableString *result = [NSMutableString string];
     [self _buildUpHtmlBodyText:myParsedMIME result:result];
     return result;
@@ -280,8 +284,11 @@
             CTMIME_SinglePart *singlePart = (CTMIME_SinglePart *)mime;
             if (singlePart.attached) {
                 
+<<<<<<< HEAD
                 //                NSLog(@"singlePArt content ID: %@",singlePart.contentId);
                 
+=======
+>>>>>>> Initial Changes
                 CTBareAttachment *attach = [[CTBareAttachment alloc]
                                             initWithMIMESinglePart:singlePart];
                 [attachments addObject:attach];
@@ -292,7 +299,8 @@
     return attachments;
 }
 
-- (void)addAttachment:(CTCoreAttachment *)attachment {
+- (void)addAttachment:(CTCoreAttachment *)attachment
+{
     CTMIME_MultiPart *multi;
     CTMIME_MessagePart *msg;
     
