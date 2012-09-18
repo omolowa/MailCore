@@ -43,16 +43,6 @@
 #import "CTMIME_HtmlPart.h"
 #import "MailCoreUtilities.h"
 
-@interface CTCoreMessage ()
-- (CTCoreAddress *)_addressFromMailbox:(struct mailimf_mailbox *)mailbox;
-- (NSSet *)_addressListFromMailboxList:(struct mailimf_mailbox_list *)mailboxList;
-- (struct mailimf_mailbox_list *)_mailboxListFromAddressList:(NSSet *)addresses;
-- (NSSet *)_addressListFromIMFAddressList:(struct mailimf_address_list *)imfList;
-- (struct mailimf_address_list *)_IMFAddressListFromAddresssList:(NSSet *)addresses;
-- (void)_buildUpBodyText:(CTMIME *)mime result:(NSMutableString *)result;
-- (void)_buildUpHtmlBodyText:(CTMIME *)mime result:(NSMutableString *)result;
-@end
-
 @implementation CTCoreMessage
 @synthesize mime=myParsedMIME, lastError;
 
@@ -520,6 +510,45 @@
         myFields->fld_to = mailimf_to_new(imf);
 }
 
+- (NSArray *)inReplyTo {
+    if (myFields->fld_in_reply_to == NULL)
+        return nil;
+    else
+        return [self _stringArrayFromClist:myFields->fld_in_reply_to->mid_list];
+}
+
+
+- (void)setInReplyTo:(NSArray *)messageIds {
+	struct mailimf_in_reply_to *imf = mailimf_in_reply_to_new([self _clistFromStringArray:messageIds]);
+
+    if (myFields->fld_in_reply_to != NULL) {
+        mailimf_in_reply_to_free(myFields->fld_in_reply_to);
+        myFields->fld_in_reply_to = imf;
+    }
+    else
+		myFields->fld_in_reply_to = imf;
+}
+
+
+- (NSArray *)references {
+    if (myFields->fld_references == NULL)
+        return nil;
+    else
+        return [self _stringArrayFromClist:myFields->fld_references->mid_list];
+}
+
+
+- (void)setReferences:(NSArray *)messageIds {
+    struct mailimf_references *imf = mailimf_references_new([self _clistFromStringArray:messageIds]);
+
+    if (myFields->fld_references != NULL) {
+        mailimf_references_free(myFields->fld_references);
+        myFields->fld_references = imf;
+    }
+    else
+		myFields->fld_references = imf;
+}
+
 
 - (NSSet *)cc {
     if (myFields->fld_cc == NULL)
@@ -778,6 +807,32 @@
         assert(err == 0);
     }
     return imfList;
+}
+
+- (NSArray *)_stringArrayFromClist:(clist *)list {
+    clistiter *iter;
+    NSMutableArray *stringSet = [NSMutableArray array];
+	char *string;
+	
+    if(list == NULL)
+        return stringSet;
+	
+    for(iter = clist_begin(list); iter != NULL; iter = clist_next(iter)) {
+        string = clist_content(iter);
+		[stringSet addObject:[[NSString alloc] initWithUTF8String:string]];
+    }
+	
+    return stringSet;
+}
+
+- (clist *)_clistFromStringArray:(NSArray *)strings {
+	clist * str_list = clist_new();
+
+	for (NSString *str in strings) {
+		clist_append(str_list, strdup([str UTF8String]));
+	}
+
+	return str_list;
 }
 
 @end

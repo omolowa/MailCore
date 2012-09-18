@@ -140,11 +140,14 @@
 - (BOOL)check;
 
 /**
+<<<<<<< HEAD
  The folder name.
  */
 - (NSString *)name;
 
 /**
+=======
+>>>>>>> upstream/master
  The entire path of folder.
  */
 - (NSString *)path;
@@ -183,6 +186,12 @@
  @return Return YES on success, NO on error. Call method lastError to get error if one occurred
  */
 - (BOOL)unsubscribe;
+
+/**
+ Exposes the IMAP APPEND command, see the IMAP RFC 4549.
+ @return Return YES on success, NO on error. Call method lastError to get error if one occurred
+*/
+- (BOOL) appendMessage: (CTCoreMessage *) msg;
 
 /**
  Retrieves the message flags. You must AND/OR using the defines constants.

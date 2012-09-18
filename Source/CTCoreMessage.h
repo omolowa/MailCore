@@ -86,11 +86,14 @@
  */
 - (id)initWithString:(NSString *)msgData;
 
+<<<<<<< HEAD
 /*
  Creates an empty message
  */
 - (id)init;
 
+=======
+>>>>>>> upstream/master
 /**
  If a method returns nil or in the case of a BOOL returns NO, call this to get the error that occured
  */
@@ -266,6 +269,28 @@
  @param addresses A NSSet containing CTCoreAddress's
  */
 - (void)setTo:(NSSet *)addresses;
+
+/**
+ Return the list of messageIds from the in-reply-to field
+*/
+- (NSArray *)inReplyTo;
+
+/**
+ Sets the message's in-reply-to messageIds
+ @param messageIds A NSArray containing NSString messageId's
+*/
+- (void)setInReplyTo:(NSArray *)messageIds;
+
+/**
+ Return the list of messageIds from the references field
+*/
+- (NSArray *)references;
+
+/**
+ Sets the message's references
+ @param messageIds A NSArray containing NSString messageId's
+*/
+- (void)setReferences:(NSArray *)messageIds;
 
 /**
  Returns the list of people the message was cced to, returns an NSSet containing CTAddress's.
